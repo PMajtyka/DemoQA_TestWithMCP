@@ -1,0 +1,261 @@
+Stwórz następującą prezentację for 35–40 minute webinar titled "Enabling Playwright MCP in the Testing Project", tailored specifically for QA Automation Engineers.
+
+
+Webinar Agenda & Timing (35–40 Minutes + Q&A)
+Part 1 (Slides 1–3): The Problem & Introduction to Playwright MCP (5 mins)
+Part 2 (Slides 4–5): Environment Setup & Real-World Troubleshooting (6 mins)
+Part 3 (Slides 6–9): From Zero to Full POM & E2E Tests in 14 Minutes (12 mins)
+Part 4 (Slides 10–12): Lessons from the Trenches: Self-Healing, Fallbacks & Feedback Loops (10 mins)
+Part 5 (Slides 13–14): Best Practices Checklist & Q&A (5 mins)
+Slide-by-Slide Content & Speaker Notes
+Slide 1: Title Slide
+Slide Content:
+
+
+Title: Enabling Playwright MCP in the Testing Project
+Subtitle: From an Empty Repository to a Verified Java POM Architecture and E2E Tests in 14 Minutes
+Footer: [Your Name / Title] | QA Automation Engineering Webinar
+Speaker Notes:
+
+
+"Welcome everyone! Today we are moving beyond using AI as a simple code autocomplete tool. Over the next 35 to 40 minutes, I will walk you through a practical, hands-on experiment: how to give an AI agent 'eyes and hands' in a real browser using Playwright MCP, and have it autonomously map an entire web application, build a Java Page Object Model architecture, generate living documentation, and write self-verified JUnit 5 tests."
+Slide 2: Why Standard LLMs Fall Short in Test Automation
+Slide Content (Two Columns):
+
+
+Traditional LLM (Coding Blind):
+
+
+Guesses locators based on training data or pasted HTML snippets.
+Cannot see dynamic runtime states (modals, JS validations, delayed elements).
+Often generates code that compiles cleanly but fails on the first execution.
+AI Agent + Playwright MCP (Live Execution):
+
+
+Launches a real browser and inspects the live DOM and Accessibility Tree.
+Clicks, fills forms, and observes application state changes in real time.
+Validates locators and fixes broken code before handing it over.
+Speaker Notes:
+
+
+"We’ve all been there: you ask an LLM to write a Page Object, it gives you nice-looking Java code, and the moment you run it, half the selectors fail because of dynamic IDs, iframes, or overlays. Standard LLMs code blind. By connecting an agent to Playwright MCP, we bridge the gap between code generation and live browser execution. The agent doesn't guess—it inspects, interacts, and verifies."
+Slide 3: What is Playwright MCP & How Does the Architecture Work?
+Slide Content:
+
+
+Model Context Protocol (MCP): An open standard connecting AI models to external tools and live environments.
+Playwright MCP Server: Exposes browser automation primitives (browser_navigate, browser_click, browser_snapshot, browser_type) directly to the IDE agent.
+Crucial Architectural Nuance for Java Teams:
+
+
+The MCP server (Node.js) manages its own browser instance for AI exploration.
+Your Java test suite still requires local Playwright Java browser binaries (mvn exec:java ... install).
+Visual Suggestion: Simple architecture diagram: IntelliJ IDEA (Copilot Agent) $\leftrightarrow$ Playwright MCP Server (Node/npx) $\leftrightarrow$ Live Browser (demoqa.com) alongside a separate box: Maven / JUnit 5 $\rightarrow$ Playwright Java Binaries.
+Speaker Notes:
+
+
+"Under the hood, MCP acts as a standardized bridge between GitHub Copilot in agent mode and a local Node.js server running Playwright. One important architectural detail for Java engineers: the browser controlled by MCP is strictly for the AI agent's exploration. When you run mvn test later, Playwright for Java still needs its own local browser binaries installed via Maven."
+Slide 4: Environment Setup in IntelliJ IDEA
+Slide Content:
+
+
+Tech Stack: JDK 21, Maven, Node.js, IntelliJ IDEA + GitHub Copilot (Agent Mode).
+Production-Ready mcp.json Configuration:
+
+
+JSON
+{
+  "servers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.85",
+        "--output-dir",
+        "./.playwright-mcp"
+      ]
+    }
+  }
+}
+
+Speaker Notes:
+
+
+"Setting this up in IntelliJ IDEA takes less than two minutes. You define the MCP server in your configuration JSON. Notice that I am pinning a specific version—0.0.85—and explicitly passing the --output-dir flag. Why didn't I just use @latest? Let’s look at a real troubleshooting trap I hit while preparing this demo."
+Slide 5: Setup Lesson Learned: Why You Should Avoid @latest
+Slide Content:
+
+
+The Issue: Running @playwright/mcp@latest without --output-dir can silently break server initialization.
+Root Cause: When launched from IntelliJ, npx may inherit the IDE's protected installation directory (Program Files) as its working directory and fail to create .playwright-mcp (Access Denied).
+The Symptom: Instead of throwing a loud error, the agent silently falls back to generating code from memory without opening a browser.
+The Fix:
+
+
+Pin a verified package version (@0.0.85).
+Explicitly define --output-dir inside your workspace.
+Exclude workspace/cache folders in Windows Defender for faster execution.
+Speaker Notes:
+
+
+"This is a huge time-saver if you plan to try this at work. During one of my test runs, the MCP server failed to initialize because it tried to create its .playwright-mcp folder inside the protected IntelliJ installation directory. The sneaky part? The agent didn't stop—it quietly fell back to guessing the website structure from its training data! Always pin your MCP version and set --output-dir explicitly."
+Slide 6: The Experiment: Project Scope & Workflow
+Slide Content:
+
+
+Target Application: [https://demoqa.com](https://demoqa.com) (6 modules, 33 active subpages, iframes, alerts, dynamic delays, floating ads).
+Rules: Zero manual POM coding—driven entirely by 3 structured prompts in Agent Mode.
+Total Execution Time: 14 minutes from an empty Maven project to passing JUnit 5 E2E tests.
+The 3-Step Workflow:
+
+
+Autonomous site mapping & POM architecture generation.
+Live-site audit & living documentation (PageDescription.md).
+E2E test generation, self-healing, and execution (LoginTest.java).
+Speaker Notes:
+
+
+"To put this to a real test, I chose DemoQA. Every QA engineer knows DemoQA—it has all the classic automation headaches: iframes, browser alerts, drag-and-drop, delayed elements, and intrusive ad banners. Using just three structured prompts, the agent built and verified the entire project in 14 minutes."
+Slide 7: Step 1 – Autonomous Site Mapping & POM Generation
+Slide Content:
+
+
+Prompt 1 Directives:
+
+
+Crawl left-hand navigation via MCP (identify all 6 sections and 33 unique routes).
+Generate clean Java packages under src/main/java/org/example/demoqa.
+Enforce locator priority: getByRole() $\rightarrow$ getByLabel() $\rightarrow$ getByPlaceholder() $\rightarrow$ getByTestId() $\rightarrow$ unique IDs.
+Include helpers for floating ads (hideFloatingAds()), scrolling (scrollTo()), and frameLocator().
+Validate every locator on the live site via MCP.
+Output: BasePage + 33 POM classes organized across 8 clean packages (alerts, bookstore, common, elements, forms, home, interactions, widgets).
+Visual Suggestion: Screenshot of the generated package tree in IntelliJ IDEA (org.example.demoqa.*).
+Speaker Notes:
+
+
+"In Prompt 1, I treated the agent like a senior automation engineer—I gave it strict architectural rules. Notice rule number 5: I required the agent to actually interact with elements on the live site via MCP to prove the locators work before moving on. In just a few minutes, it generated BasePage and 33 strongly-typed Page Objects."
+Slide 8: Step 2 – Live Audit & Living Documentation
+Slide Content:
+
+
+Prompt 2 Directives: Compare all generated POM classes against the live website via MCP and generate PageDescription.md.
+What the Agent Produced:
+
+
+A complete coverage matrix mapping 33 routes to their POM classes and public business/state methods.
+Maven build and Playwright binary installation commands.
+Proactive Gap Analysis: Flagged that src/test/java and JUnit 5 dependencies were missing from pom.xml.
+Visual Suggestion: Screenshot of the rendered PageDescription.md coverage table.
+Speaker Notes:
+
+
+"Documentation is usually the first thing we skip. In Step 2, I asked the agent to audit its own code against the live website and write PageDescription.md. Not only did it generate a clean API reference table for all 33 classes, it also noticed that our pom.xml lacked a test runner and JUnit 5 dependencies."
+Slide 9: Step 3 – Generating & Validating E2E Tests (LoginTest.java)
+Slide Content:
+
+
+Prompt 3 Directives: Inspect /login behavior via MCP and build a JUnit 5 suite in LoginTest.java.
+3 Automated Scenarios Covered:
+
+
+testValidationForEmptyFields() – verifies client-side is-invalid CSS state without triggering an API call.
+testLoginWithInvalidCredentials() – validates error messaging for unknown users and wrong passwords.
+testSuccessfulLogin() – verifies redirection to /profile, username display, and Logout button visibility.
+Speaker Notes:
+
+
+"Finally, in Step 3, I asked the agent to inspect the login flow and write a complete JUnit 5 test class. It navigated to /login, tested empty submissions, tested bad credentials, and verified a successful login flow. And right here, something remarkable happened."
+Slide 10: MCP in Action: Autonomous Self-Healing
+Slide Content:
+
+
+What Happened During Test Execution:
+
+
+While verifying LoginTest.java against the live site via MCP, the agent discovered that the Logout button locator generated earlier in ProfilePage didn't match the live DOM.
+Self-Correction: The agent automatically updated ProfilePage, added validation helpers to LoginPage, configured JUnit/Surefire in pom.xml, and re-ran the checks.
+Generated Assertion Code:
+
+
+Java
+page.waitForURL("**/profile");
+assertEquals("https://demoqa.com/profile", page.url());
+ProfilePage profilePage = new ProfilePage(page);
+assertThat(profilePage.username).hasText(username);
+assertThat(profilePage.logoutButton).isVisible();
+
+Speaker Notes:
+
+
+"Look at that summary from the agent: while building the test, it realized its earlier assumption about the Logout locator on ProfilePage was wrong on the live page. Instead of handing me a broken test, it went back into src/main/java, fixed ProfilePage, extended LoginPage with validation helpers, and verified everything passed. That is real-time self-healing during development."
+Slide 11: Case Study: Active MCP vs. "Blind" LLM Fallback
+Slide Content (Comparison Table):
+Dimension
+Agent with Active MCP
+Agent without MCP (Fallback)
+Source of Truth
+Live DOM & Accessibility Tree
+Model training memory
+Navigation Mapping
+33 active routes (ignored disabled Register link)
+34 routes (generated dead code for disabled link)
+POM Accuracy
+Self-healed ProfilePage locators on the fly
+Unverified locators; required manual debugging
+Test Data Strategy
+Verified live flow with a temporary API user
+Relied solely on skipped Assumptions
+Speaker Notes:
+
+
+"Because I hit that MCP directory issue earlier, I actually have a direct side-by-side comparison of the exact same prompts running with and without MCP. Without MCP, the agent even built a Page Object for a disabled 'Register' menu item because it remembered it from old training data. With MCP, it saw the link was disabled in the live DOM and skipped it."
+Slide 12: Non-Determinism & The Agentic Feedback Loop
+Slide Content:
+
+
+The Test Data Challenge: DemoQA has no static test user. Across runs, the agent chose two valid engineering strategies:
+
+
+Run A (Full API Lifecycle): Discovered /Account/v1/User via Swagger, created a UUID user in @BeforeEach, and deleted it in @AfterEach.
+Run B (CI/CD Environment Variables): Used System.getenv("DEMOQA_USERNAME") with Assumptions.assumeTrue(...)—throwing TestAbortedException when run locally without env vars.
+The Fix (Agentic Feedback Loop): Pasting the single TestAbortedException line back into chat prompted the agent to immediately refactor the test and implement createUser() via the DemoQA REST API.
+Speaker Notes:
+
+
+"Here is an important takeaway about LLM non-determinism. In one run, the agent automatically wrote REST API calls to create and delete a user in @BeforeEach and @AfterEach. In another run, it played it safe and used environment variables, which threw a TestAbortedException locally. All I had to do was paste that single exception line into the chat, and the agent immediately refactored the test to create users via API. You don't need a perfect prompt on try one—use the test output as a feedback loop."
+Slide 13: Best Practices Checklist for QA Engineers
+Slide Content:
+
+
+Pin Versions & Paths: Always specify an explicit @playwright/mcp version and --output-dir in mcp.json.
+Prompt Like an Architect: Define locator strategies, base class responsibilities, and assertion patterns upfront.
+Mandate Live Verification: Explicitly instruct the agent to test every generated locator and flow via MCP before finishing.
+Work in Stages: Map & build POMs $\rightarrow$ Audit & document $\rightarrow$ Generate & run tests.
+Close the Feedback Loop: Feed stack traces and JUnit exceptions directly back to the agent, and always review git diff.
+Speaker Notes:
+
+
+"If you want to adopt Playwright MCP in your QA team tomorrow, follow these five rules. Treat the agent like a fast, capable mid-level engineer: give it clear architectural guardrails, force it to prove its work in a live browser, and review the final git diff just like any pull request."
+Slide 14: Summary & Q&A
+Slide Content:
+
+
+What We Built in 14 Minutes:
+
+
+33 live-verified Java Page Object classes + BasePage.
+Auto-generated coverage matrix (PageDescription.md).
+Self-healed JUnit 5 E2E test suite with automated API test-data setup.
+Questions & Discussion (Q&A)
+Speaker Notes:
+
+
+"To wrap up: in 14 minutes, we went from an empty repository to 33 verified Page Objects, living documentation, and self-healing JUnit 5 tests. Playwright MCP shifts our daily work from manually hunting down CSS selectors to designing test architecture and reviewing AI-verified code. Thank you—I’d love to hear your questions!"
+
+To make the slides visually engaging for engineers, 4 quick screenshots from IntelliJ project:
+
+
+Slide 4: mcp.json file alongside the active Playwright MCP tools list in GitHub Copilot.
+Slide 7: The expanded src/main/java/org/example/demoqa package tree in IntelliJ.
+Slide 8: A preview of the rendered PageDescription.md table.
+(missing, will be added manually - just leave a placeholder) Slide 10 or 14: terminal output showing mvn test passing all 3 tests in green.
