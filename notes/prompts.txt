@@ -67,6 +67,7 @@ Execute the following steps autonomously:
      * `testLoginWithInvalidCredentials()`
      * `testValidationForEmptyFields()`
    - Clear assertions verifying expected UI states, error messages, or URL redirections using the POM methods.
+   - Test data creation and cleanup in BeforeEach and AfterEach
 4. Execute the test actions on the live site via Playwright MCP to verify that every locator and assertion in `LoginTest.java` passes without issues. If any assertion or locator fails (e.g., due to dynamic overlays or delayed DOM updates), adjust the test or POM code self-sufficiently.
 
 Open https://demoqa.com/login, verify the interactions via MCP, and generate `LoginTest.java`.
