@@ -258,4 +258,4 @@ To make the slides visually engaging for engineers, 4 quick screenshots from Int
 Slide 4: mcp.json file alongside the active Playwright MCP tools list in GitHub Copilot.
 Slide 7: The expanded src/main/java/org/example/demoqa package tree in IntelliJ.
 Slide 8: A preview of the rendered PageDescription.md table.
-(missing, will be added manually - just leave a placeholder) Slide 10 or 14: terminal output showing mvn test passing all 3 tests in green.
+Slide 10 or 14: terminal output showing mvn test passing all 3 tests in green.

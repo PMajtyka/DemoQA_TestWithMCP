@@ -1,0 +1,80 @@
+Act as a fully autonomous Playwright Test Automation Engineer. Your goal is to independently map the entire website https://demoqa.com using Playwright MCP tools and generate a complete Page Object Model (POM) architecture in JAVA (Playwright for Java).
+
+Execute the following task completely autonomously, ensuring the highest quality of Java code:
+
+Open the homepage https://demoqa.com using Playwright MCP.
+
+Analyze the website navigation:
+
+Identify all available sections.
+Identify all unique subpages available in the left-side navigation menu.
+
+Propose and create a clear Java package structure (under src/main/java/... or src/test/java/...) corresponding to the modules discovered on the website.
+
+Visit the identified subpages one by one and generate a Java POM class for each page according to the following rules:
+
+Analyze the DOM tree, accessibility profiles, and all resulting/state-dependent elements (such as messages, modals, alerts, and any elements that appear after user interactions).
+Generate stable locators of type com.microsoft.playwright.Locator, initialized either in the constructor or as class fields.
+Prioritize locator strategies in the following order:
+page.getByRole()
+page.getByLabel()
+page.getByPlaceholder()
+page.getByTestId()
+unique IDs
+Every Java class MUST contain:
+A constructor accepting a Page object.
+Private/public Locator fields.
+Business action methods (e.g. submitForm(), clickButton()).
+State/text retrieval methods for future assertions (e.g. getSuccessMessage(), getTableRowsCount()).
+Include handling for floating/interfering advertisements, scrolling to elements (scrollIntoViewIfNeeded()), and frame switching using frameLocator().
+
+Validate all generated locators on the live site through MCP by performing sample interactions and verifying that the elements are interactive.
+
+Execute the task section by section. Start with the homepage, map the entire website, and continuously generate the corresponding .java files.
+
+
+
+
+
+
+
+
+
+
+Analyze all generated POM classes alongside the live https://demoqa.com site via Playwright MCP. Create a PageDescription.md file containing a matrix of all covered pages, available business methods for each POM class, and instructions on how to run the test suite.
+
+
+
+
+
+
+
+
+
+Act as an autonomous QA Automation Engineer. Your goal is to write, execute, and validate a comprehensive JUnit 5 test suite for the Login functionality on https://demoqa.com/login using our existing Login POM class and Playwright MCP.
+
+Execute the following steps autonomously:
+
+1. Locate and inspect our existing Login Page Object Model class (e.g., `LoginPage.java` / `BookStoreLoginPage.java`).
+
+2. Using Playwright MCP, navigate to https://demoqa.com/login and inspect the actual page behavior during both valid and invalid login attempts:
+   - Invalid credentials (empty fields, incorrect password, wrong username).
+   - Valid session flow (or UI response when attempting authorization).
+3. Create a clean JUnit 5 test class named `LoginTest.java` (under `src/test/java/...`) that includes:
+   - Proper `@BeforeEach` and `@AfterEach` hooks for Playwright `Playwright`, `Browser`, `BrowserContext`, and `Page` initialization/teardown.
+   - Separate test methods using JUnit 5 `@Test` and `@DisplayName` annotations covering:
+     * `testSuccessfulLogin()`
+     * `testLoginWithInvalidCredentials()`
+     * `testValidationForEmptyFields()`
+   - Clear assertions verifying expected UI states, error messages, or URL redirections using the POM methods.
+4. Execute the test actions on the live site via Playwright MCP to verify that every locator and assertion in `LoginTest.java` passes without issues. If any assertion or locator fails (e.g., due to dynamic overlays or delayed DOM updates), adjust the test or POM code self-sufficiently.
+
+Open https://demoqa.com/login, verify the interactions via MCP, and generate `LoginTest.java`.
+
+
+
+
+
+
+
+org.opentest4j.TestAbortedException: Assumption failed: Set DEMOQA_USERNAME and DEMOQA_PASSWORD to run the successful-login test.
